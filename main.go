@@ -16,22 +16,32 @@ type CommandStruct struct {
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	text, _ := reader.ReadString('\n')
+	for {
+		text, _ := reader.ReadString('\n')
 
-	text = strings.TrimSpace(text)
-	text_tokens := strings.Fields(text)
+		text = strings.TrimSpace(text)
+		text_tokens := strings.Fields(text)
 
-	result := CommandStruct{command: text_tokens[0], args: text_tokens[1:]}
+		if text == "" {
+			continue
+		}
 
-	for index := range result.args {
-		fmt.Printf("%s \n", result.args[index])
+		if text_tokens[0] == "exit" {
+			break
+		}
+
+		result := CommandStruct{command: text_tokens[0], args: text_tokens[1:]}
+
+		for index := range result.args {
+			fmt.Printf("%s \n", result.args[index])
+		}
+
+		cmd := exec.Command(result.command, result.args...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+
+		cmd.Run()
 	}
-
-	cmd := exec.Command(result.command, result.args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
-	cmd.Run()
 
 }
