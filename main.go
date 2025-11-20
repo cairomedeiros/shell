@@ -47,12 +47,15 @@ func main() {
 			fmt.Println("cwd:", cwd)
 		}
 
-		cmd := exec.Command(result.command, result.args...)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
+		if result.command != "cd" && result.command != "pwd" && result.command != "exit" {
+			cmd := exec.Command(result.command, result.args...)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			cmd.Stdin = os.Stdin
 
-		cmd.Run()
+			cmd.Run()
+		}
+
 	}
 
 }
