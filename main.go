@@ -27,13 +27,24 @@ func main() {
 		}
 
 		if text_tokens[0] == "exit" {
-			break
+			os.Exit(1)
 		}
 
 		result := CommandStruct{command: text_tokens[0], args: text_tokens[1:]}
 
 		for index := range result.args {
 			fmt.Printf("%s \n", result.args[index])
+		}
+
+		if result.command == "cd" {
+			err := os.Chdir(strings.Join(result.args, " "))
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+		if result.command == "pwd" {
+			cwd, _ := os.Getwd()
+			fmt.Println("cwd:", cwd)
 		}
 
 		cmd := exec.Command(result.command, result.args...)
