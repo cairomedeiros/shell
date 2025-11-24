@@ -19,8 +19,11 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	commands := cmdFunc{
 		"cd": func(args []string) {
-			err := os.Chdir(strings.Join(args, " "))
-			if err != nil {
+			if len(args) == 0 {
+				fmt.Println("cd: missing args")
+				return
+			}
+			if err := os.Chdir(strings.Join(args, " ")); err != nil {
 				fmt.Println(err)
 			}
 		},
