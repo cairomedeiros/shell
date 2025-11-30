@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 type CommandStruct struct {
@@ -14,6 +16,22 @@ type CommandStruct struct {
 }
 
 type cmdFunc map[string]func(args []string)
+
+func setupSignals() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		for sig := range c {
+			switch sig {
+			case os.Interrupt:
+				fmt.Println()
+			case syscall.SIGTERM:
+				fmt.Println("\n(SIGTERM)")
+			}
+		}
+	}()
+}
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
@@ -35,7 +53,7 @@ func main() {
 			os.Exit(1)
 		},
 	}
-
+	setupSignals()
 	for {
 		text, _ := reader.ReadString('\n')
 
@@ -57,13 +75,15 @@ func main() {
 			continue
 		}
 
-		if result.command != "cd" && result.command != "pwd" && result.command != "exit" {
-			cmd := exec.Command(result.command, result.args...)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Stdin = os.Stdin
+		cmd := exec.Command(result.command, result.args...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
 
-			cmd.Run()
+		cmd.Run()
+
+		if err := cmd.Run(); err != nil {
+			fmt.Printf("%s: command not found\n", result.command)
 		}
 
 	}
